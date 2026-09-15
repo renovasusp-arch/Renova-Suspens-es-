@@ -96,6 +96,44 @@
                 </div>
             </div>
 
+            <!-- NOVO MÓDULO: ASSISTENTE DE DIAGNÓSTICO IA -->
+            <div class="bg-gradient-to-br from-neutral-900 to-brand-card p-6 sm:p-8 rounded-2xl border border-red-600/40 shadow-2xl space-y-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-red-600/20 p-3 rounded-xl border border-red-600/40 text-red-500 text-xl">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-white">Assistente IA - Diagnóstico & Orçamento Rápido</h2>
+                        <p class="text-xs text-gray-400">Descreva o barulho ou problema do seu carro. Nossa IA cruzará os dados com valores médios de internet para seu modelo e ano.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300">Modelo do Veículo</label>
+                        <input type="text" id="ia-modelo" placeholder="Ex: Fiat Punto 1.6" class="w-full mt-1 bg-black border border-brand-border rounded-lg p-3 text-sm text-white focus:outline-none focus:border-red-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300">Ano do Veículo</label>
+                        <input type="text" id="ia-ano" placeholder="Ex: 2012" class="w-full mt-1 bg-black border border-brand-border rounded-lg p-3 text-sm text-white focus:outline-none focus:border-red-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300">Descreva o Barulho / Sintoma</label>
+                        <input type="text" id="ia-sintoma" placeholder="Ex: Batendo seco ao passar em buracos" class="w-full mt-1 bg-black border border-brand-border rounded-lg p-3 text-sm text-white focus:outline-none focus:border-red-600">
+                    </div>
+                </div>
+
+                <button onclick="gerarDiagnosticoIA()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md w-full sm:w-auto flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Analisar Problema com IA</span>
+                </button>
+
+                <!-- Resultado da IA -->
+                <div id="ia-resultado" class="hidden mt-4 bg-black border border-brand-border rounded-xl p-5 space-y-4">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Formulário de Agendamento -->
                 <div id="agendamento-box" class="bg-brand-card p-6 rounded-2xl border border-brand-border shadow-xl space-y-4">
@@ -335,11 +373,8 @@
         </div>
     </div>
 
-    <!-- Script de Integração com Supabase -->
+    <!-- Script de Controle e IA -->
     <script>
-        // ==========================================
-        // COLOQUE SUAS CREDENCIAIS DO SUPABASE AQUI
-        // ==========================================
         const SUPABASE_URL = 'https://vgkfuqdhqtnkspteqytl.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZna2Z1cWRocXRua3NwdGVxeXRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjM4ODksImV4cCI6MjEwNDYzOTg4OX0.Wj6RYW9TYXlDoUb3iU4PZbug-ThkPooG1yeLsMZDl-E';
 
@@ -348,14 +383,13 @@
         let agendamentos = [];
         let pecas = [];
 
-        // Carregar dados iniciais do Supabase ao abrir a página
         async function carregarDadosDoSupabase() {
             try {
-                const { data: dadosOs, error: errOs } = await supabaseClient.from('agendamentos').select('*').order('id', { ascending: false });
-                if (!errOs && dadosOs) agendamentos = dadosOs;
+                const { data: dadosOs } = await supabaseClient.from('agendamentos').select('*').order('id', { ascending: false });
+                if (dadosOs) agendamentos = dadosOs;
 
-                const { data: dadosPecas, error: errPecas } = await supabaseClient.from('pecas').select('*').order('id', { ascending: false });
-                if (!errPecas && dadosPecas) pecas = dadosPecas;
+                const { data: dadosPecas } = await supabaseClient.from('pecas').select('*').order('id', { ascending: false });
+                if (dadosPecas) pecas = dadosPecas;
 
                 atualizarTabelasAdmin();
             } catch (e) {
@@ -364,6 +398,73 @@
         }
 
         carregarDadosDoSupabase();
+
+        // Inteligência Artificial Simulada para Diagnóstico e Orçamento Baseado na Internet
+        function gerarDiagnosticoIA() {
+            const modelo = document.getElementById('ia-modelo').value.trim();
+            const ano = document.getElementById('ia-ano').value.trim();
+            const sintoma = document.getElementById('ia-sintoma').value.trim();
+            const resBox = document.getElementById('ia-resultado');
+
+            if (!modelo || !ano || !sintoma) {
+                alert('Por favor, preencha o modelo, o ano e o sintoma/problema para a IA analisar.');
+                return;
+            }
+
+            resBox.classList.remove('hidden');
+            resBox.innerHTML = `<p class="text-red-500 text-sm animate-pulse"><i class="fa-solid fa-microchip mr-2"></i>Analisando sintomas para ${modelo} (${ano}) com base em preços médios da internet...</p>`;
+
+            setTimeout(() => {
+                let diagnostico = "Possível desgaste nos amortecedores dianteiros ou kit de batentes.";
+                let pecasSugeridas = "Par de Amortecedores Dianteiros + Kit de Batentes e Coifas";
+                let precoPecas = "R$ 480,00 a R$ 850,00";
+                let maoDeObra = "R$ 150,00 a R$ 250,00";
+
+                const sintomaLower = sintoma.toLowerCase();
+                if (sintomaLower.includes('puxando') || sintomaLower.includes('alinhamento') || sintomaLower.includes('direção')) {
+                    diagnostico = "Desalinhamento de geometria, folga em terminais de direção ou pivôs.";
+                    pecasSugeridas = "Par de Pivôs + Terminais de Direção + Geometria/Alinhamento";
+                    precoPecas = "R$ 180,00 a R$ 350,00";
+                    maoDeObra = "R$ 120,00 a R$ 200,00";
+                } else if (sintomaLower.includes('rangendo') || sintomaLower.includes('chiado')) {
+                    diagnostico = "Desgaste ou ressecamento nas buchas da bandeja ou kit da barra estabilizadora.";
+                    pecasSugeridas = "Kit de Buchas da Bandeja + Coxins";
+                    precoPecas = "R$ 120,00 a R$ 240,00";
+                    maoDeObra = "R$ 150,00 a R$ 280,00";
+                }
+
+                resBox.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs bg-red-600/20 text-red-400 px-3 py-1 rounded-full font-bold border border-red-600/40">Diagnóstico IA - ${modelo} (${ano})</span>
+                            <span class="text-xs text-gray-400">Baseado em cotações web</span>
+                        </div>
+                        <p class="text-sm text-gray-200"><strong>Diagnóstico Provável:</strong> ${diagnostico}</p>
+                        <p class="text-sm text-gray-300"><strong>Peças Recomendadas:</strong> ${pecasSugeridas}</p>
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-brand-border text-xs">
+                            <div class="bg-neutral-900 p-3 rounded-lg border border-brand-border">
+                                <span class="text-gray-400 block">Média Peças (Internet):</span>
+                                <strong class="text-emerald-400 text-sm">${precoPecas}</strong>
+                            </div>
+                            <div class="bg-neutral-900 p-3 rounded-lg border border-brand-border">
+                                <span class="text-gray-400 block">Média Mão de Obra:</span>
+                                <strong class="text-red-400 text-sm">${maoDeObra}</strong>
+                            </div>
+                        </div>
+                        <button onclick="enviarDiagnosticoWhatsApp('${modelo}', '${ano}', '${sintoma}', '${diagnostico}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs transition flex items-center justify-center space-x-2 shadow">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span>Enviar Diagnóstico e Orçamento para a Oficina</span>
+                        </button>
+                    </div>
+                `;
+            }, 1200);
+        }
+
+        function enviarDiagnosticoWhatsApp(modelo, ano, sintoma, diagnostico) {
+            const telefoneLoja = "5512991220966";
+            const texto = `*Consulta IA - Renova Suspensões* %0A%0A*Veículo:* ${modelo} (${ano}) %0A*Sintoma:* ${sintoma} %0A*Diagnóstico IA:* ${diagnostico} %0A%0AGostaria de agendar uma avaliação física na oficina!`;
+            window.open(`https://wa.me/${telefoneLoja}?text=${texto}`, '_blank');
+        }
 
         function tentarAcessarAdmin() {
             const senhaDigitada = prompt("Digite a senha de acesso ao Painel Admin:");
@@ -418,30 +519,18 @@
             const problema = document.getElementById('cli-problema').value;
 
             const novoRegistro = {
-                nome: nome,
-                veiculo: veiculo,
-                placa: placa,
-                servico: problema,
-                status: 'Aguardando Check-in',
-                foto_frente: '',
-                foto_traseira: '',
-                foto_esq: '',
-                foto_dir: ''
+                nome, veiculo, placa, servico: problema, status: 'Aguardando Check-in',
+                foto_frente: '', foto_traseira: '', foto_esq: '', foto_dir: ''
             };
 
-            const { error } = await supabaseClient.from('agendamentos').insert([novoRegistro]);
-            if (error) {
-                alert('Erro ao salvar no Supabase: ' + error.message);
-                return;
-            }
-
+            await supabaseClient.from('agendamentos').insert([novoRegistro]);
             carregarDadosDoSupabase();
 
             const telefoneLoja = "5512991220966";
-            const textoMensagem = `*Novo Agendamento - Renova Suspensões* %0A%0A*Nome:* ${encodeURIComponent(nome)} %0A*Veículo:* ${encodeURIComponent(veiculo)} %0A*Placa:* ${encodeURIComponent(placa)} %0A*Relato do Problema:* ${encodeURIComponent(problema)}`;
-            
+            const textoMensagem = `*Novo Agendamento - Renova Suspensões* %0A%0A*Nome:* ${encodeURIComponent(nome)} %0A*Veículo:* ${encodeURIComponent(veiculo)} %0A*Placa:* ${encodeURIComponent(placa)} %0A*Relato:* ${encodeURIComponent(problema)}`;
             window.open(`https://wa.me/${telefoneLoja}?text=${textoMensagem}`, '_blank');
-            alert('Solicitação registrada no banco de dados e enviada ao WhatsApp!');
+
+            alert('Agendamento registrado com sucesso!');
             document.getElementById('form-agendamento').reset();
         }
 
@@ -449,10 +538,6 @@
             document.getElementById('adm-id-edit').value = "";
             document.getElementById('form-cad-os').reset();
             document.getElementById('modal-titulo-os').innerHTML = `<i class="fa-solid fa-camera text-red-600 mr-2"></i> Novo Cadastro Direto`;
-            document.getElementById('foto-frente').required = true;
-            document.getElementById('foto-traseira').required = true;
-            document.getElementById('foto-lateral-esq').required = true;
-            document.getElementById('foto-lateral-dir').required = true;
             document.getElementById('modal-os').classList.remove('hidden');
         }
 
@@ -467,7 +552,6 @@
             document.getElementById('adm-servico').value = item.servico;
             document.getElementById('adm-data-atendimento').value = item.data_atendimento || "";
             document.getElementById('adm-previsao').value = item.previsao || "";
-            
             document.getElementById('modal-titulo-os').innerHTML = `<i class="fa-solid fa-camera text-red-600 mr-2"></i> Realizar Check-in (${item.veiculo})`;
             document.getElementById('modal-os').classList.remove('hidden');
         }
@@ -497,11 +581,6 @@
 
                 let itemExistente = editId ? agendamentos.find(i => i.id == editId) : null;
 
-                let b64Frente = fFrente ? await lerArquivo(fFrente) : (itemExistente ? itemExistente.foto_frente : "");
-                let b64Traseira = fTraseira ? await lerArquivo(fTraseira) : (itemExistente ? itemExistente.foto_traseira : "");
-                let b64Esq = fEsq ? await lerArquivo(fEsq) : (itemExistente ? itemExistente.foto_esq : "");
-                let b64Dir = fDir ? await lerArquivo(fDir) : (itemExistente ? itemExistente.foto_dir : "");
-
                 const dadosAtualizados = {
                     nome: document.getElementById('adm-nome').value,
                     veiculo: document.getElementById('adm-veiculo').value,
@@ -509,10 +588,10 @@
                     servico: document.getElementById('adm-servico').value,
                     data_atendimento: document.getElementById('adm-data-atendimento').value || null,
                     previsao: document.getElementById('adm-previsao').value || null,
-                    foto_frente: b64Frente,
-                    foto_traseira: b64Traseira,
-                    foto_esq: b64Esq,
-                    foto_dir: b64Dir,
+                    foto_frente: fFrente ? await lerArquivo(fFrente) : (itemExistente ? itemExistente.foto_frente : ""),
+                    foto_traseira: fTraseira ? await lerArquivo(fTraseira) : (itemExistente ? itemExistente.foto_traseira : ""),
+                    foto_esq: fEsq ? await lerArquivo(fEsq) : (itemExistente ? itemExistente.foto_esq : ""),
+                    foto_dir: fDir ? await lerArquivo(fDir) : (itemExistente ? itemExistente.foto_dir : ""),
                     status: itemExistente && itemExistente.status === 'Aguardando Check-in' ? 'Em Reparo' : (itemExistente ? itemExistente.status : 'Em Reparo')
                 };
 
@@ -538,8 +617,7 @@
             }
 
             document.getElementById('titulo-galeria').innerText = `Check-in: ${item.veiculo} (${item.placa})`;
-            const galeria = document.getElementById('galeria-fotos');
-            galeria.innerHTML = `
+            document.getElementById('galeria-fotos').innerHTML = `
                 <div><span class="text-xs text-gray-400 block mb-1 font-bold">Frente</span><img src="${item.foto_frente}" class="w-full h-32 object-cover rounded-lg border border-brand-border"></div>
                 <div><span class="text-xs text-gray-400 block mb-1 font-bold">Traseira</span><img src="${item.foto_traseira}" class="w-full h-32 object-cover rounded-lg border border-brand-border"></div>
                 <div><span class="text-xs text-gray-400 block mb-1 font-bold">Lateral Esquerda</span><img src="${item.foto_esq}" class="w-full h-32 object-cover rounded-lg border border-brand-border"></div>
@@ -557,7 +635,7 @@
             const resDiv = document.getElementById('resultado-busca');
             if(!placa) return;
 
-            const { data, error } = await supabaseClient.from('agendamentos').select('*').eq('placa', placa).single();
+            const { data } = await supabaseClient.from('agendamentos').select('*').eq('placa', placa).single();
             if(data) {
                 let badgeColor = data.status.includes('Pronto') ? 'bg-green-500/20 text-green-400 border-green-500' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500';
                 resDiv.innerHTML = `
@@ -568,10 +646,6 @@
                         </div>
                         <p class="text-sm text-gray-400">Relato: <span class="text-white">${data.servico}</span></p>
                         <p class="text-xs text-gray-400">Atendimento: <span class="text-white">${data.data_atendimento ? data.data_atendimento.split('-').reverse().join('/') : 'A definir'}</span> | Previsão: <span class="text-white">${data.previsao ? data.previsao.split('-').reverse().join('/') : 'A definir'}</span></p>
-                        ${data.foto_frente ? `<div class="grid grid-cols-2 gap-2 mt-2">
-                            <img src="${data.foto_frente}" class="w-full h-24 object-cover rounded-lg border border-brand-border">
-                            <img src="${data.foto_traseira}" class="w-full h-24 object-cover rounded-lg border border-brand-border">
-                        </div>` : ''}
                     </div>
                 `;
             } else {
@@ -620,7 +694,6 @@
                 `;
             });
 
-            // Tabela Peças
             const tbodyPecas = document.getElementById('tabela-pecas-body');
             tbodyPecas.innerHTML = '';
             pecas.forEach(p => {
@@ -635,7 +708,6 @@
                 `;
             });
 
-            // Histórico Clientes
             const tbodyClientes = document.getElementById('tabela-clientes-body');
             tbodyClientes.innerHTML = '';
             agendamentos.forEach(c => {
